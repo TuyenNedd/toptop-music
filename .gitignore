@@ -1,0 +1,8 @@
+# BMAD internal/cache
+_bmad/
+
+# Kiro IDE settings (personal)
+.kiro/
+
+# Agent skills/config
+.agent/

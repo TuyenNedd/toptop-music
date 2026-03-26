@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TikTok-inspired color token system (CSS Variables)
+   Dark mode is PRIMARY (default). Light mode is parallel.
+   ============================================================ */
+:root {
+  --color-primary: #25f4ee; /* Cyan — accents, active states, progress bar */
+  --color-secondary: #fe2c55; /* Red — favorites, alerts, CTAs */
+  --color-bg: #ffffff; /* Light mode page background */
+  --color-surface: #f5f5f5; /* Light mode cards, panels */
+  --color-surface-hover: #ebebeb; /* Light mode hover state */
+  --color-surface-active: #e0e0e0; /* Light mode active/pressed */
+  --color-text: #010101; /* Light mode primary text */
+  --color-text-secondary: #8a8a8a; /* Metadata, timestamps, subtitles */
+  --color-text-tertiary: #b0b0b0; /* Placeholder, disabled text */
+  --color-border: #e0e0e0; /* Light mode borders, dividers */
+  --color-success: #00c853; /* Success states */
+  --color-warning: #ffab00; /* Warning states */
+  --color-error: #ff3d00; /* Error states */
+
+  /* Font stack — Inter variable font mapped to font-sans utility */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
+.dark {
+  --color-bg: #010101;
+  --color-surface: #161616;
+  --color-surface-hover: #222222;
+  --color-surface-active: #2a2a2a;
+  --color-text: #ffffff;
+  --color-text-secondary: #8a8a8a;
+  --color-text-tertiary: #555555;
+  --color-border: #2a2a2a;
+}
+
+/* ============================================================
+   Tailwind v4 theme extension via @theme inline
+   `inline` keyword allows referencing CSS custom properties
+   without circular self-references.
+   ============================================================ */
+@theme inline {
+  /* Colors */
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-surface-active: var(--color-surface-active);
+  --color-text: var(--color-text);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+
+  /* Font */
+  --font-sans: var(--font-sans);
+
+  /* Spacing — player bar heights */
+  --spacing-player-mobile: 64px;
+  --spacing-player-desktop: 90px;
+  --spacing-tab-bar: 56px;
+}

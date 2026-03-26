@@ -1,0 +1,51 @@
+[project]
+name = "backend"
+version = "0.1.0"
+description = "TikTok Music Discovery Platform - Backend API"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]",
+    "sqlalchemy[asyncio]",
+    "aiomysql",
+    "alembic",
+    "redis",
+    "pydantic-settings",
+    "python-jose[cryptography]",
+    "passlib[bcrypt]",
+    "httpx",
+    "structlog",
+    "apscheduler",
+    "TikTok-Api",
+    "yt-dlp",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+    "pre-commit",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+exclude = [".venv", "venv", "__pycache__"]
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

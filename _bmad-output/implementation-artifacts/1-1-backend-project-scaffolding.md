@@ -1,6 +1,6 @@
 # Story 1.1: Backend Project Scaffolding
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -26,36 +26,47 @@ so that I have a working backend foundation to build all features on.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Initialize backend project (AC: #1)
-  - [ ] Run `uv init backend --python 3.14`
-  - [ ] Verify `.python-version` contains `3.14`
-- [ ] Task 2: Configure dependencies (AC: #2)
-  - [ ] Add core dependencies to `pyproject.toml`: `fastapi[standard]`, `sqlalchemy[asyncio]`, `aiomysql`, `alembic`, `redis`, `pydantic-settings`, `python-jose[cryptography]`, `passlib[bcrypt]`, `httpx`, `structlog`, `apscheduler`, `TikTok-Api`, `yt-dlp`
-  - [ ] Add dev dependencies: `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `mypy`, `pre-commit`
-  - [ ] Run `uv sync` and verify `.venv` is created
-- [ ] Task 3: Create modular monolith directory structure (AC: #3)
-  - [ ] Create `app/__init__.py`
-  - [ ] Create `app/auth/__init__.py`
-  - [ ] Create `app/sounds/__init__.py`
-  - [ ] Create `app/scraper/__init__.py`
-  - [ ] Create `app/admin/__init__.py`
-  - [ ] Create `app/core/__init__.py`
-- [ ] Task 4: Create FastAPI app with health endpoint (AC: #4)
-  - [ ] Create `app/main.py` with FastAPI app factory
-  - [ ] Implement `/health` endpoint returning standard envelope `{"data": {"status": "ok"}, "error": null}`
-  - [ ] Register CORS middleware (restricted to app domain)
-  - [ ] Add lifespan context manager (empty for now, will be used by APScheduler later)
-- [ ] Task 5: Create configuration module (AC: #5)
-  - [ ] Create `app/config.py` with `Settings(BaseSettings)` class
-  - [ ] Define all config fields: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET_KEY`, `JWT_EXPIRY_MINUTES=30`, `TIKTOK_MS_TOKEN`, `VN_PROXY_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `CACHE_MAX_SIZE_GB=10`, `TRENDING_FETCH_INTERVAL_MINUTES=30`, `TRENDING_FETCH_COUNT=50`
-  - [ ] Use `model_config = SettingsConfigDict(env_file=".env")` for .env loading
-- [ ] Task 6: Create .env.example (AC: #6)
-  - [ ] Create `.env.example` with all environment variable placeholders and comments
-- [ ] Task 7: Configure linting and type checking (AC: #7)
-  - [ ] Add `[tool.ruff]` section to `pyproject.toml` (target Python 3.14, line-length 120, select rules)
-  - [ ] Add `[tool.mypy]` section (strict mode, ignore missing imports for third-party libs)
-  - [ ] Run `uv run ruff check .` — zero errors
-  - [ ] Run `uv run mypy .` — zero errors
+- [x] Task 1: Initialize backend project (AC: #1)
+  - [x] Run `uv init backend --python 3.14`
+  - [x] Verify `.python-version` contains `3.14`
+- [x] Task 2: Configure dependencies (AC: #2)
+  - [x] Add core dependencies to `pyproject.toml`: `fastapi[standard]`, `sqlalchemy[asyncio]`, `aiomysql`, `alembic`, `redis`, `pydantic-settings`, `python-jose[cryptography]`, `passlib[bcrypt]`, `httpx`, `structlog`, `apscheduler`, `TikTok-Api`, `yt-dlp`
+  - [x] Add dev dependencies: `pytest`, `pytest-asyncio`, `pytest-cov`, `ruff`, `mypy`, `pre-commit`
+  - [x] Run `uv sync` and verify `.venv` is created
+- [x] Task 3: Create modular monolith directory structure (AC: #3)
+  - [x] Create `app/__init__.py`
+  - [x] Create `app/auth/__init__.py`
+  - [x] Create `app/sounds/__init__.py`
+  - [x] Create `app/scraper/__init__.py`
+  - [x] Create `app/admin/__init__.py`
+  - [x] Create `app/core/__init__.py`
+- [x] Task 4: Create FastAPI app with health endpoint (AC: #4)
+  - [x] Create `app/main.py` with FastAPI app factory
+  - [x] Implement `/health` endpoint returning standard envelope `{"data": {"status": "ok"}, "error": null}`
+  - [x] Register CORS middleware (restricted to app domain)
+  - [x] Add lifespan context manager (empty for now, will be used by APScheduler later)
+- [x] Task 5: Create configuration module (AC: #5)
+  - [x] Create `app/config.py` with `Settings(BaseSettings)` class
+  - [x] Define all config fields: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET_KEY`, `JWT_EXPIRY_MINUTES=30`, `TIKTOK_MS_TOKEN`, `VN_PROXY_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `CACHE_MAX_SIZE_GB=10`, `TRENDING_FETCH_INTERVAL_MINUTES=30`, `TRENDING_FETCH_COUNT=50`
+  - [x] Use `model_config = SettingsConfigDict(env_file=".env")` for .env loading
+- [x] Task 6: Create .env.example (AC: #6)
+  - [x] Create `.env.example` with all environment variable placeholders and comments
+- [x] Task 7: Configure linting and type checking (AC: #7)
+  - [x] Add `[tool.ruff]` section to `pyproject.toml` (target Python 3.14, line-length 120, select rules)
+  - [x] Add `[tool.mypy]` section (strict mode, ignore missing imports for third-party libs)
+  - [x] Run `uv run ruff check .` — zero errors
+  - [x] Run `uv run mypy .` — zero errors
+
+### Review Follow-ups (AI)
+
+- [x] [Review][Patch] CORS allowed_origins hardcoded — move to Settings [backend/app/main.py]
+- [x] [Review][Patch] .gitignore missing from backend/ — spec lists it as required [backend/.gitignore]
+- [x] [Review][Patch] module-level `settings = Settings()` — no production secret validation [backend/app/config.py]
+- [x] [Review][Patch] ruff missing exclude for .venv in pyproject.toml [backend/pyproject.toml]
+- [x] [Review][Patch] test_config.py creates Settings() without env isolation — tests are env-dependent [backend/tests/test_config.py]
+- [x] [Review][Defer] route handler defined inside create_app() factory — acceptable for scaffolding, pre-existing pattern [backend/app/main.py] — deferred, pre-existing
+- [x] [Review][Defer] module-level TestClient in test_health.py — lifespan is empty now, revisit when startup logic added [backend/tests/test_health.py] — deferred, pre-existing
+- [x] [Review][Defer] CORS allow_methods/headers=["*"] overly permissive — tighten per-environment in later story [backend/app/main.py] — deferred, pre-existing
 
 ## Dev Notes
 
@@ -176,10 +187,45 @@ backend/
 
 ### Agent Model Used
 
-(to be filled by dev agent)
+Claude Opus 4.6
 
 ### Debug Log References
 
+No issues encountered.
+
 ### Completion Notes List
 
+- Initialized backend project with `uv init backend --python 3.14` (Python 3.14.3)
+- Installed 88 packages (13 core + 6 dev dependencies) via `uv sync`
+- Created modular monolith structure: app/, auth/, sounds/, scraper/, admin/, core/ with **init**.py
+- FastAPI app with `/health` endpoint returning standard API envelope format
+- Settings class with pydantic-settings loading all config from env vars with dev defaults
+- .env.example with all required environment variable placeholders
+- Ruff linter (line-length 120, Python 3.14 target) and mypy (strict mode) both pass with zero errors
+- 15 tests written and passing: health endpoint, config defaults, directory structure validation
+- Removed default `main.py` generated by `uv init`
+
 ### File List
+
+- backend/pyproject.toml (new)
+- backend/.python-version (new)
+- backend/uv.lock (new)
+- backend/README.md (new)
+- backend/.env.example (new)
+- backend/app/**init**.py (new)
+- backend/app/main.py (new)
+- backend/app/config.py (new)
+- backend/app/auth/**init**.py (new)
+- backend/app/sounds/**init**.py (new)
+- backend/app/scraper/**init**.py (new)
+- backend/app/admin/**init**.py (new)
+- backend/app/core/**init**.py (new)
+- backend/tests/**init**.py (new)
+- backend/tests/test_health.py (new)
+- backend/tests/test_config.py (new)
+- backend/tests/test_structure.py (new)
+
+## Change Log
+
+- 2026-03-26: Story 1.1 implemented — Backend project scaffolded with FastAPI, all 7 tasks complete, 15 tests passing, ruff + mypy clean.
+- 2026-03-26: Code review complete — 5 patches applied (CORS config, .gitignore, secret validation warning, ruff exclude, test isolation), 3 deferred, 1 dismissed. 16 tests passing.

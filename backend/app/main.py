@@ -29,7 +29,25 @@ from app.database import get_db
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan context manager."""
     await init_redis()
+
+    # Start APScheduler for trending fetcher
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from apscheduler.triggers.interval import IntervalTrigger
+
+    from app.scraper.fetcher import fetch_trending_job
+
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        fetch_trending_job,
+        trigger=IntervalTrigger(minutes=settings.TRENDING_FETCH_INTERVAL_MINUTES),
+        id="trending_fetcher",
+        replace_existing=True,
+    )
+    scheduler.start()
+
     yield
+
+    scheduler.shutdown(wait=False)
     await close_redis()
 
 

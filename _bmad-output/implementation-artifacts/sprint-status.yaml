@@ -97,14 +97,14 @@ development_status:
   epic-6-retrospective: optional
 
   # Epic 7: Playback Resilience
-  epic-7: backlog
-  7-1-auto-retry-alternative-source-fallback: backlog
-  7-2-graceful-skip-cached-only-fallback: backlog
+  epic-7: done
+  7-1-auto-retry-alternative-source-fallback: done
+  7-2-graceful-skip-cached-only-fallback: done
   epic-7-retrospective: optional
 
   # Epic 8: Admin Dashboard & System Management
-  epic-8: backlog
-  8-1-admin-dashboard-overview: backlog
-  8-2-audit-log-viewer: backlog
-  8-3-scraper-management-manual-refresh: backlog
+  epic-8: done
+  8-1-admin-dashboard-overview: done
+  8-2-audit-log-viewer: done
+  8-3-scraper-management-manual-refresh: done
   epic-8-retrospective: optional

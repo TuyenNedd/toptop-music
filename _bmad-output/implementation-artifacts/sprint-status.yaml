@@ -89,11 +89,11 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: Favorites & Playlists
-  epic-6: backlog
-  6-1-favorites-backend-heart-button: backlog
-  6-2-favorites-list-page: backlog
-  6-3-playlist-crud: backlog
-  6-4-playlist-sound-management-playback: backlog
+  epic-6: done
+  6-1-favorites-backend-heart-button: done
+  6-2-favorites-list-page: done
+  6-3-playlist-crud: done
+  6-4-playlist-sound-management-playback: done
   epic-6-retrospective: optional
 
   # Epic 7: Playback Resilience

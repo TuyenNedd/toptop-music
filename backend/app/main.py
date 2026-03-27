@@ -23,6 +23,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestIDMiddleware
 from app.core.redis import close_redis, get_redis, init_redis
 from app.database import get_db
+from app.sounds.playlist_router import router as playlist_router
 from app.sounds.router import router as sounds_router
 
 
@@ -123,6 +124,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(admin_router)
     app.include_router(sounds_router)
+    app.include_router(playlist_router)
 
     return app
 

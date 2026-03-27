@@ -196,3 +196,100 @@ async def stream_audio(
         media_type=content_type,
         headers={"Accept-Ranges": "bytes"},
     )
+
+
+# --- Favorites ---
+
+
+@router.post("/{sound_id}/favorite", status_code=201)
+async def add_favorite(
+    sound_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Add a sound to favorites."""
+    from sqlalchemy.exc import IntegrityError
+
+    from app.sounds.models import Favorite
+
+    fav = Favorite(user_id=current_user.id, sound_id=sound_id)
+    db.add(fav)
+    try:
+        await db.flush()
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        from app.core.exceptions import AppException
+
+        raise AppException(
+            code="FAVORITE_DUPLICATE",
+            message="Sound already in favorites",
+            status_code=409,
+        )
+    return {"data": {"sound_id": sound_id, "favorited": True}, "error": None}
+
+
+@router.delete("/{sound_id}/favorite")
+async def remove_favorite(
+    sound_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Remove a sound from favorites."""
+    from sqlalchemy import delete
+
+    from app.sounds.models import Favorite
+
+    await db.execute(
+        delete(Favorite).where(
+            Favorite.user_id == current_user.id,
+            Favorite.sound_id == sound_id,
+        )
+    )
+    await db.commit()
+    return {"data": {"sound_id": sound_id, "favorited": False}, "error": None}
+
+
+@router.get("/favorites")
+async def get_favorites(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Get user's favorite sounds."""
+    from sqlalchemy import func as sa_func
+    from sqlalchemy import select
+
+    from app.sounds.models import Favorite, Sound
+
+    # Count
+    count_q = (
+        select(sa_func.count())
+        .select_from(Favorite)
+        .where(Favorite.user_id == current_user.id)
+    )
+    total = (await db.execute(count_q)).scalar_one()
+
+    # Paginated join
+    offset = (page - 1) * page_size
+    q = (
+        select(Sound)
+        .join(Favorite, Favorite.sound_id == Sound.id)
+        .where(Favorite.user_id == current_user.id)
+        .order_by(Favorite.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
+    sounds = list((await db.execute(q)).scalars().all())
+
+    return {
+        "data": [SoundResponse.model_validate(s).model_dump() for s in sounds],
+        "pagination": PaginationMeta(
+            page=page,
+            page_size=page_size,
+            total=total,
+            has_next=(page * page_size) < total,
+        ).model_dump(),
+        "error": None,
+    }

@@ -16,3 +16,10 @@
 
 - Test routes permanently added to app in `test_exceptions.py` — acceptable for unit tests
 - `BaseHTTPMiddleware` has known streaming issues — revisit in Story 5.1 when `/api/stream/*` is added
+
+## Deferred from: code review of 1-5-docker-compose-local-development-environment (2026-03-27)
+
+- Dev deps installed in Docker image — acceptable for dev Dockerfile, separate prod Dockerfile later
+- `alembic/` directory not in volume mount — alembic changes require rebuild
+- Root config files not in frontend volume mount — expected for dev
+- MySQL healthcheck only checks mysqld process, not full connection readiness

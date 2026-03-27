@@ -80,12 +80,12 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Audio Playback & Persistent Player
-  epic-5: backlog
-  5-1-audio-streaming-backend-signed-urls-proxy: backlog
-  5-2-persistent-playerbar-audio-engine: backlog
-  5-3-full-screen-now-playing-view: backlog
-  5-4-play-queue-auto-queue-behavior: backlog
-  5-5-player-controls-accessibility: backlog
+  epic-5: done
+  5-1-audio-streaming-backend-signed-urls-proxy: done
+  5-2-persistent-playerbar-audio-engine: done
+  5-3-full-screen-now-playing-view: done
+  5-4-play-queue-auto-queue-behavior: done
+  5-5-player-controls-accessibility: done
   epic-5-retrospective: optional
 
   # Epic 6: Favorites & Playlists

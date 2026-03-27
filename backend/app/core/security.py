@@ -1,5 +1,7 @@
-"""Security utilities — password hashing, JWT, HMAC signing (future)."""
+"""Security utilities — password hashing, JWT, HMAC signing."""
 
+import hashlib
+import hmac
 import secrets
 from datetime import UTC, datetime, timedelta
 
@@ -52,3 +54,25 @@ def decode_access_token(token: str) -> dict[str, object]:
 def create_refresh_token() -> str:
     """Generate a cryptographically secure refresh token string."""
     return secrets.token_urlsafe(48)
+
+
+# --- HMAC signed URLs for audio streaming ---
+
+
+def create_signed_stream_url(sound_id: int, user_id: int, expires: int) -> str:
+    """Generate HMAC-SHA256 signed token for audio streaming."""
+    message = f"{sound_id}:{user_id}:{expires}"
+    signature = hmac.new(
+        settings.JWT_SECRET_KEY.encode("utf-8"),
+        message.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return signature
+
+
+def verify_signed_stream_url(
+    sound_id: int, user_id: int, expires: int, token: str
+) -> bool:
+    """Verify HMAC-SHA256 signed stream token."""
+    expected = create_signed_stream_url(sound_id, user_id, expires)
+    return hmac.compare_digest(expected, token)

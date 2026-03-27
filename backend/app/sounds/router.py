@@ -95,3 +95,104 @@ async def search_sounds(
         await redis.set(cache_key, json.dumps(response, default=str), ex=600)
 
     return response
+
+
+@router.get("/stream-url/{sound_id}")
+async def get_stream_url(
+    sound_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Generate a signed streaming URL for a sound."""
+    import time
+
+    from app.core.security import create_signed_stream_url
+
+    expires = int(time.time()) + 7200  # 2 hours
+    token = create_signed_stream_url(sound_id, current_user.id, expires)
+
+    return {
+        "data": {
+            "url": f"/api/sounds/stream/{sound_id}?token={token}&expires={expires}&uid={current_user.id}",
+        },
+        "error": None,
+    }
+
+
+@router.get("/stream/{sound_id}", response_model=None)
+async def stream_audio(
+    sound_id: int,
+    token: str = Query(...),
+    expires: int = Query(...),
+    uid: int = Query(...),
+    db: AsyncSession = Depends(get_db),
+) -> Any:
+    """Stream audio file with signed URL verification."""
+    import os
+    import time
+
+    from fastapi.responses import FileResponse
+    from starlette.responses import JSONResponse
+
+    from app.core.security import verify_signed_stream_url
+    from app.sounds.stream import ensure_cached
+
+    # Verify token
+    if not verify_signed_stream_url(sound_id, uid, expires, token):
+        return JSONResponse(
+            status_code=403,
+            content={
+                "data": None,
+                "error": {
+                    "code": "STREAM_INVALID_TOKEN",
+                    "message": "Invalid stream token",
+                },
+            },
+        )
+
+    if expires < int(time.time()):
+        return JSONResponse(
+            status_code=403,
+            content={
+                "data": None,
+                "error": {
+                    "code": "STREAM_URL_EXPIRED",
+                    "message": "Stream URL has expired",
+                },
+            },
+        )
+
+    # Get sound
+    repo = SoundRepository(db)
+    sound = await repo.get_by_id(sound_id)
+    if not sound:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "data": None,
+                "error": {"code": "SOUND_NOT_FOUND", "message": "Sound not found"},
+            },
+        )
+
+    # Ensure cached (on-demand download if needed)
+    file_path = await ensure_cached(sound, db)
+    if not file_path or not os.path.exists(file_path):
+        return JSONResponse(
+            status_code=503,
+            content={
+                "data": None,
+                "error": {
+                    "code": "STREAM_UNAVAILABLE",
+                    "message": "Audio not available",
+                },
+            },
+        )
+
+    # Determine content type
+    content_type = "audio/mpeg" if file_path.endswith(".mp3") else "audio/mp4"
+
+    return FileResponse(
+        path=file_path,
+        media_type=content_type,
+        headers={"Accept-Ranges": "bytes"},
+    )

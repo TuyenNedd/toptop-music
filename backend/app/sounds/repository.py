@@ -21,6 +21,11 @@ class SoundRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_id(self, sound_id: int) -> Sound | None:
+        """Find sound by primary key ID."""
+        result = await self.db.execute(select(Sound).where(Sound.id == sound_id))
+        return result.scalar_one_or_none()
+
     async def upsert(
         self,
         tiktok_sound_id: str,

@@ -23,6 +23,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestIDMiddleware
 from app.core.redis import close_redis, get_redis, init_redis
 from app.database import get_db
+from app.sounds.router import router as sounds_router
 
 
 @asynccontextmanager
@@ -121,6 +122,7 @@ def create_app() -> FastAPI:
     # Routers
     app.include_router(auth_router)
     app.include_router(admin_router)
+    app.include_router(sounds_router)
 
     return app
 

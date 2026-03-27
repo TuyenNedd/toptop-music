@@ -72,11 +72,11 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: Sound Discovery & Browsing
-  epic-4: backlog
-  4-1-trending-sounds-api-ssr-page: backlog
-  4-2-sound-card-component-metadata-display: backlog
-  4-3-sound-search: backlog
-  4-4-navigation-components-tabbar-sidebar: backlog
+  epic-4: done
+  4-1-trending-sounds-api-ssr-page: done
+  4-2-sound-card-component-metadata-display: done
+  4-3-sound-search: done
+  4-4-navigation-components-tabbar-sidebar: done
   epic-4-retrospective: optional
 
   # Epic 5: Audio Playback & Persistent Player

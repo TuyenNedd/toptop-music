@@ -62,3 +62,62 @@ class SoundRepository:
             self.db.add(sound)
         await self.db.flush()
         return sound
+
+    async def get_trending(
+        self, page: int = 1, page_size: int = 20
+    ) -> tuple[list[Sound], int]:
+        """Get trending sounds sorted by trend_rank, paginated.
+
+        Returns (sounds, total_count).
+        """
+        from sqlalchemy import func as sa_func
+
+        # Count
+        count_result = await self.db.execute(
+            select(sa_func.count())
+            .select_from(Sound)
+            .where(Sound.trend_rank.isnot(None))
+        )
+        total = count_result.scalar_one()
+
+        # Paginated results
+        offset = (page - 1) * page_size
+        result = await self.db.execute(
+            select(Sound)
+            .where(Sound.trend_rank.isnot(None))
+            .order_by(Sound.trend_rank.asc())
+            .offset(offset)
+            .limit(page_size)
+        )
+        return list(result.scalars().all()), total
+
+    async def search(
+        self, query: str, page: int = 1, page_size: int = 20
+    ) -> tuple[list[Sound], int]:
+        """Search sounds by title or artist (LIKE query for MVP).
+
+        Returns (sounds, total_count).
+        """
+        from sqlalchemy import func as sa_func
+        from sqlalchemy import or_
+
+        like_pattern = f"%{query}%"
+        where_clause = or_(
+            Sound.title.ilike(like_pattern),
+            Sound.artist.ilike(like_pattern),
+        )
+
+        count_result = await self.db.execute(
+            select(sa_func.count()).select_from(Sound).where(where_clause)
+        )
+        total = count_result.scalar_one()
+
+        offset = (page - 1) * page_size
+        result = await self.db.execute(
+            select(Sound)
+            .where(where_clause)
+            .order_by(Sound.trend_rank.asc().nullslast())
+            .offset(offset)
+            .limit(page_size)
+        )
+        return list(result.scalars().all()), total

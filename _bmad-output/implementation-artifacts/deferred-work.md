@@ -23,3 +23,9 @@
 - `alembic/` directory not in volume mount — alembic changes require rebuild
 - Root config files not in frontend volume mount — expected for dev
 - MySQL healthcheck only checks mysqld process, not full connection readiness
+
+## Deferred from: code review of 1-6-ci-cd-pipeline (2026-03-27)
+
+- `uv.lock` drift detection via `--frozen` — desired behavior, catches uncommitted lock changes
+- `npx tsc` version resolution — resolves from node_modules first, fine
+- Docker build without BuildKit cache — acceptable for MVP, optimize later

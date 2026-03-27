@@ -53,14 +53,14 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: User Authentication & Registration
-  epic-2: in-progress
+  epic-2: done
   2-1-user-registration-with-invite-code: done
   2-2-user-registration-without-invite-code: done
   2-3-user-login-jwt-session-management: done
   2-4-token-refresh-logout: done
   2-5-admin-invite-code-management: done
   2-6-admin-user-approval-account-management: done
-  2-7-registration-login-frontend-pages: backlog
+  2-7-registration-login-frontend-pages: done
   epic-2-retrospective: optional
 
   # Epic 3: TikTok Data Pipeline & Audio Caching

@@ -2,11 +2,12 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.schemas import RegisterRequest, UserResponse
+from app.auth.schemas import LoginRequest, RegisterRequest, TokenResponse, UserResponse
 from app.auth.service import AuthService
+from app.config import settings
 from app.database import get_db
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -21,3 +22,34 @@ async def register(
     service = AuthService(db)
     user = await service.register(data)
     return {"data": UserResponse.model_validate(user).model_dump(), "error": None}
+
+
+@router.post("/login")
+async def login(
+    data: LoginRequest,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Authenticate user and return JWT access token."""
+    ip = request.client.host if request.client else "unknown"
+    service = AuthService(db)
+    access_token, refresh_token, expires_at = await service.login(
+        data.username_or_email, data.password, ip
+    )
+
+    # Set refresh token as httpOnly secure cookie
+    # secure=False in dev (HTTP), True in production (HTTPS)
+    is_production = not settings.JWT_SECRET_KEY.startswith("dev-")
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=is_production,
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60,  # 7 days
+        path="/api/auth",
+    )
+
+    token_data = TokenResponse(access_token=access_token)
+    return {"data": token_data.model_dump(), "error": None}

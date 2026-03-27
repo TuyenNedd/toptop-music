@@ -35,3 +35,17 @@ class UserResponse(BaseModel):
     status: str
 
     model_config = {"from_attributes": True}
+
+
+class LoginRequest(BaseModel):
+    """Login request body."""
+
+    username_or_email: str = Field(min_length=1)
+    password: str = Field(min_length=1)
+
+
+class TokenResponse(BaseModel):
+    """Token response after successful login."""
+
+    access_token: str
+    token_type: str = "bearer"

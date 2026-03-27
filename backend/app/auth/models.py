@@ -84,3 +84,47 @@ class InviteCode(Base):
     used_by: Mapped[User | None] = relationship("User", foreign_keys=[used_by_id])
 
     __table_args__ = (Index("idx_invite_codes_code", "code"),)
+
+
+class RefreshToken(Base):
+    """Refresh token for session management."""
+
+    __tablename__ = "refresh_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    token: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    revoked: Mapped[bool] = mapped_column(default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    user: Mapped[User] = relationship("User", foreign_keys=[user_id])
+
+    __table_args__ = (Index("idx_refresh_tokens_token", "token"),)
+
+
+class AuditLog(Base):
+    """Audit log for security-sensitive actions."""
+
+    __tablename__ = "audit_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    user_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True
+    )
+    ip_address: Mapped[str] = mapped_column(String(45), nullable=False)
+    details: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
+
+    __table_args__ = (
+        Index("idx_audit_logs_event_type", "event_type"),
+        Index("idx_audit_logs_user_id", "user_id"),
+        Index("idx_audit_logs_created_at", "created_at"),
+    )

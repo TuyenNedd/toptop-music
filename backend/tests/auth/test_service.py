@@ -152,3 +152,34 @@ async def test_register_invalid_invite_code_raises() -> None:
     with pytest.raises(AppException) as exc_info:
         await service.register(data)
     assert exc_info.value.code == "AUTH_REGISTER_INVALID_INVITE"
+
+
+@pytest.mark.asyncio
+async def test_register_without_invite_creates_pending_user() -> None:
+    """Registration without invite code creates user with status pending."""
+    db = AsyncMock()
+    service = _make_service(db)
+
+    service.user_repo.get_by_username = AsyncMock(return_value=None)
+    service.user_repo.get_by_email = AsyncMock(return_value=None)
+
+    created_user = MagicMock(spec=User)
+    created_user.id = 2
+    created_user.username = "pendinguser"
+    created_user.email = "pending@example.com"
+    created_user.role = "member"
+    created_user.status = UserStatus.PENDING
+    service.user_repo.create = AsyncMock(return_value=created_user)
+
+    data = RegisterRequest(
+        username="pendinguser",
+        email="pending@example.com",
+        password="securepass123",
+        # No invite_code — should create pending user
+    )
+    user = await service.register(data)
+
+    assert user.status == UserStatus.PENDING
+    # invite_repo.mark_used should NOT be called
+    service.invite_repo.mark_used = AsyncMock()
+    db.commit.assert_awaited_once()

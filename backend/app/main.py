@@ -11,6 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse
 
+from app.admin.router import router as admin_router
 from app.auth.router import router as auth_router
 from app.config import settings
 from app.core.exceptions import (
@@ -101,6 +102,7 @@ def create_app() -> FastAPI:
 
     # Routers
     app.include_router(auth_router)
+    app.include_router(admin_router)
 
     return app
 

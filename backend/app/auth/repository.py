@@ -36,6 +36,20 @@ class UserRepository:
         await self.db.refresh(user)
         return user
 
+    async def get_by_status(self, status: str) -> list[User]:
+        """Get all users with a given status."""
+        result = await self.db.execute(
+            select(User).where(User.status == status).order_by(User.created_at.desc())
+        )
+        return list(result.scalars().all())
+
+    async def update_status(self, user: User, new_status: str) -> User:
+        """Update user status."""
+        user.status = new_status
+        await self.db.flush()
+        await self.db.refresh(user)
+        return user
+
 
 class InviteCodeRepository:
     """Database operations for InviteCode model."""
@@ -49,6 +63,13 @@ class InviteCodeRepository:
             select(InviteCode).where(InviteCode.code == code)
         )
         return result.scalar_one_or_none()
+
+    async def get_all(self) -> list[InviteCode]:
+        """Get all invite codes ordered by created_at desc."""
+        result = await self.db.execute(
+            select(InviteCode).order_by(InviteCode.created_at.desc())
+        )
+        return list(result.scalars().all())
 
     async def mark_used(self, invite: InviteCode, user_id: int) -> None:
         """Mark an invite code as used by a user."""

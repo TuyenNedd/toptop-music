@@ -4,10 +4,14 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import JSONResponse
 
 from app.config import settings
+from app.database import get_db
 
 
 @asynccontextmanager
@@ -37,8 +41,28 @@ def create_app() -> FastAPI:
 
     @app.get("/health")
     async def health_check() -> dict[str, Any]:
-        """Health check endpoint."""
+        """Liveness check — app is running."""
         return {"data": {"status": "ok"}, "error": None}
+
+    @app.get("/health/ready", response_model=None)
+    async def health_ready(
+        db: AsyncSession = Depends(get_db),
+    ) -> JSONResponse | dict[str, Any]:
+        """Readiness check — verifies database connectivity."""
+        try:
+            await db.execute(text("SELECT 1"))
+            return {"data": {"status": "ok", "database": "connected"}, "error": None}
+        except Exception:
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "data": None,
+                    "error": {
+                        "code": "DB_UNAVAILABLE",
+                        "message": "Database connection failed",
+                    },
+                },
+            )
 
     return app
 

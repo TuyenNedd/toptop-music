@@ -237,3 +237,64 @@ class AuthService:
         logger.info("user_logged_in", user_id=user.id, username=user.username)
 
         return access_token, refresh_token_str, expires_at
+
+    async def refresh_token(self, token_str: str) -> tuple[str, str, datetime]:
+        """Rotate refresh token and issue new access token.
+
+        Returns (access_token, new_refresh_token, expires_at).
+        """
+        rt = await self.refresh_repo.get_by_token(token_str)
+        if not rt:
+            raise AppException(
+                code="AUTH_REFRESH_INVALID",
+                message="Invalid or revoked refresh token",
+                status_code=401,
+            )
+
+        if rt.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
+            await self.refresh_repo.revoke(rt)
+            await self.db.commit()
+            raise AppException(
+                code="AUTH_REFRESH_EXPIRED",
+                message="Refresh token has expired",
+                status_code=401,
+            )
+
+        # Revoke old token
+        await self.refresh_repo.revoke(rt)
+
+        # Issue new tokens
+        user = await self.user_repo.get_by_id(rt.user_id)
+        if not user or user.status != UserStatus.ACTIVE:
+            await self.db.commit()
+            raise AppException(
+                code="AUTH_ACCOUNT_INACTIVE",
+                message="Account is not active",
+                status_code=403,
+            )
+
+        access_token = create_access_token(user.id, user.role)
+        new_refresh_str = create_refresh_token()
+        expires_at = datetime.now(UTC) + timedelta(days=7)
+
+        new_rt = RefreshToken(
+            token=new_refresh_str,
+            user_id=user.id,
+            expires_at=expires_at,
+        )
+        await self.refresh_repo.create(new_rt)
+        await self.db.commit()
+
+        logger.info("token_refreshed", user_id=user.id)
+        return access_token, new_refresh_str, expires_at
+
+    async def logout(self, token_str: str, ip_address: str) -> None:
+        """Revoke refresh token and log the logout event."""
+        rt = await self.refresh_repo.get_by_token(token_str)
+        if rt:
+            await self.refresh_repo.revoke(rt)
+            await self._log_audit(
+                "logout", rt.user_id, ip_address, {"action": "logout"}
+            )
+            await self.db.commit()
+            logger.info("user_logged_out", user_id=rt.user_id)

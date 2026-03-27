@@ -53,3 +53,66 @@ async def login(
 
     token_data = TokenResponse(access_token=access_token)
     return {"data": token_data.model_dump(), "error": None}
+
+
+def _is_production() -> bool:
+    return not settings.JWT_SECRET_KEY.startswith("dev-")
+
+
+@router.post("/refresh")
+async def refresh(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Refresh access token using refresh token cookie."""
+    token_str = request.cookies.get("refresh_token")
+    if not token_str:
+        from app.core.exceptions import AppException
+
+        raise AppException(
+            code="AUTH_REFRESH_MISSING",
+            message="No refresh token provided",
+            status_code=401,
+        )
+
+    service = AuthService(db)
+    access_token, new_refresh, expires_at = await service.refresh_token(token_str)
+
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh,
+        httponly=True,
+        secure=_is_production(),
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60,
+        path="/api/auth",
+    )
+
+    token_data = TokenResponse(access_token=access_token)
+    return {"data": token_data.model_dump(), "error": None}
+
+
+@router.post("/logout")
+async def logout(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Logout — revoke refresh token and clear cookie."""
+    token_str = request.cookies.get("refresh_token")
+    ip = request.client.host if request.client else "unknown"
+
+    if token_str:
+        service = AuthService(db)
+        await service.logout(token_str, ip)
+
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/auth",
+        httponly=True,
+        secure=_is_production(),
+        samesite="lax",
+    )
+
+    return {"data": {"message": "Logged out successfully"}, "error": None}

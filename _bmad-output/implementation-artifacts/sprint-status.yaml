@@ -57,7 +57,7 @@ development_status:
   2-1-user-registration-with-invite-code: done
   2-2-user-registration-without-invite-code: done
   2-3-user-login-jwt-session-management: done
-  2-4-token-refresh-logout: backlog
+  2-4-token-refresh-logout: done
   2-5-admin-invite-code-management: backlog
   2-6-admin-user-approval-account-management: backlog
   2-7-registration-login-frontend-pages: backlog

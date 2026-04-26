@@ -8,7 +8,7 @@ from TikTokApi import TikTokApi
 ms_token = os.environ.get("TIKTOK_MS_TOKEN", None)
 
 
-async def test_trending():
+async def test_trending() -> None:
     print(f"ms_token: {'set' if ms_token else 'None (Playwright will self-generate)'}")
 
     async with TikTokApi() as api:
@@ -25,9 +25,7 @@ async def test_trending():
         async for video in api.trending.videos(count=10):
             data = video.as_dict
             music = data.get("music", {})
-            print(
-                f"  #{count + 1}: {music.get('title', 'N/A')} - {music.get('authorName', 'N/A')}"
-            )
+            print(f"  #{count + 1}: {music.get('title', 'N/A')} - {music.get('authorName', 'N/A')}")
             count += 1
 
         print(f"\nTotal videos fetched: {count}")

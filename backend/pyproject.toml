@@ -16,8 +16,8 @@ dependencies = [
     "httpx",
     "structlog",
     "apscheduler",
-    "TikTok-Api",
     "yt-dlp",
+    "tiktokapi>=7.3.2",
 ]
 
 [dependency-groups]

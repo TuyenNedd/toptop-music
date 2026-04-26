@@ -2,12 +2,23 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
+# System deps for Playwright
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+    libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+    libxrandr2 libgbm1 libpango-1.0-0 libcairo2 libasound2 \
+    libatspi2.0-0 libwayland-client0 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install uv package manager
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Install dependencies (cached layer)
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen
+
+# Install Playwright browsers
+RUN uv run playwright install chromium
 
 # Copy application source
 COPY . .
